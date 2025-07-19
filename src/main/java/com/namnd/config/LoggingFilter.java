@@ -17,6 +17,7 @@ import java.util.UUID;
 
 @Component
 public class LoggingFilter extends OncePerRequestFilter {
+
     private static final Logger log = LoggerFactory.getLogger(LoggingFilter.class);
     private static final String LOG_ID = "X-Request-Log-Id";
 
@@ -49,6 +50,19 @@ public class LoggingFilter extends OncePerRequestFilter {
 
             wrappedResponse.copyBodyToResponse();
         }
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.startsWith("/swagger-ui")
+                || path.startsWith("/v3/api-docs")
+                || path.startsWith("/swagger-resources")
+                || path.startsWith("/webjars")
+                || path.endsWith(".css")
+                || path.endsWith(".js")
+                || path.endsWith(".ico")
+                || path.contains("actuator");
     }
 
     private String getBody(byte[] content, String encoding) {
