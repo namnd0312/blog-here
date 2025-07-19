@@ -6,7 +6,6 @@ import com.namnd.dto.request.GetPostsOfAuthor;
 import com.namnd.dto.response.PageDTO;
 import com.namnd.dto.response.PostManageDetailDTO;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
