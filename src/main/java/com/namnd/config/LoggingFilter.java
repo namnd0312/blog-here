@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jboss.logging.MDC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -27,27 +28,27 @@ public class LoggingFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         String uuid = UUID.randomUUID().toString();
+        MDC.put("traceId", uuid); // Gắn vào MDC
 
-        // Gói request và response lại để đọc body nhiều lần
         ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
-
-        // Add log ID vào header (có thể trả lại cho client luôn)
         wrappedResponse.setHeader(LOG_ID, uuid);
 
-        long startTime = System.currentTimeMillis();
 
+
+        long startTime = System.currentTimeMillis();
         try {
             filterChain.doFilter(wrappedRequest, wrappedResponse);
+
+            String reqBody = getBody(wrappedRequest.getContentAsByteArray(), request.getCharacterEncoding());
+            log.info("Request ---> [{}] --> {} {} | Body: {}", uuid, request.getMethod(), request.getRequestURI(), reqBody);
         } finally {
             long duration = System.currentTimeMillis() - startTime;
 
-            String reqBody = getBody(wrappedRequest.getContentAsByteArray(), request.getCharacterEncoding());
             String resBody = getBody(wrappedResponse.getContentAsByteArray(), response.getCharacterEncoding());
+            log.info("Response ---> [{}] <-- {} | Duration: {}ms | Body: {}", uuid, response.getStatus(), duration, resBody);
 
-            log.info("[{}] --> {} {} | Body: {}", uuid, request.getMethod(), request.getRequestURI(), reqBody);
-            log.info("[{}] <-- {} | Duration: {}ms | Body: {}", uuid, response.getStatus(), duration, resBody);
-
+            MDC.clear();
             wrappedResponse.copyBodyToResponse();
         }
     }
