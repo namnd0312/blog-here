@@ -24,18 +24,21 @@ public class ExceptionCustomHandler {
     @ExceptionHandler(SQLException.class)
     public ResponseEntity<ResponseDTO<?>> sqlExceptionHandler(SQLException sqlException) {
         LOGGER.error("SQL_EXCEPTION ==============>> {}", sqlException.getMessage());
+        sqlException.printStackTrace();
         return ResponseEntity.ok(ResponseDTO.error(MessageEnum.SQL_EXCEPTION.getCode(), MessageEnum.SQL_EXCEPTION.formatMessage(sqlException.getMessage())));
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ResponseDTO<?>> sqlViolationExceptionHandler(SQLException sqlException) {
         LOGGER.error("SQL_EXCEPTION ==============>> {}", sqlException.getMessage());
+        sqlException.printStackTrace();
         return ResponseEntity.ok(ResponseDTO.error(MessageEnum.SQL_EXCEPTION.getCode(), MessageEnum.SQL_EXCEPTION.formatMessage(sqlException.getMessage())));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ResponseDTO<?>> exceptionHandler(Exception ex) {
         LOGGER.error("UNHANDLED_ERROR ==============>> {}", ex.getMessage());
+        ex.getStackTrace();
         return ResponseEntity.ok(ResponseDTO.error(MessageEnum.UN_HANDLE_ERROR.getCode(), MessageEnum.UN_HANDLE_ERROR.formatMessage(ex.getMessage())));
     }
 
